@@ -35,11 +35,13 @@ def read_txt (go):
         open(place + '/' + name, 'wb').write(data.content)
         with open(place + '/' + name, 'r') as file:
             lines = file.readlines()
-        return [lines[58], lines[59]]
+        words1 = lines[58].split()
+        words2 = lines[59].split()
+        return [words1[3], words2[2], words2[3], words2[4], words2[5], words2[6], words2[7]]
        
 try:
     data = read_txt(True)
-    print(str(data[0]) + '  ' + str(data[1]))
+    print(data)
 
 except  KeyboardInterrupt:
     print("something don't work")
