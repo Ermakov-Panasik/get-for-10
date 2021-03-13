@@ -96,7 +96,7 @@ def create_orbital_track_shapefile_for_day (track_day, step, dur, tle):
 
 #Функция, сохраняющая данные data в файл под именем name
 def save_file_as (data, name):
-    np.savetxt(place + '/' + name + ".txt", data, fmt = '%3.0d')
+    np.savetxt(place + '\\' + name + ".txt", data, fmt = '%3.0d')
 
 # функция возвращает расстояние между 2 точками в трёхмерном декартовом пространстве
 def distance (coord1, coord2):
@@ -108,7 +108,7 @@ def find_angle (lk_coord, traectory):
         lines = file.readlines()
         experiment_time = []
         angles = []
-        for i in range(0, lines.size(), 1):
+        for i in range(0, len(lines), 1):
             data = (lines[i]).split()
             position = [data[0], data[1], data[2]]
             R1 = distance([0, 0, 0], lk_coord)
@@ -148,20 +148,19 @@ def find_angle (lk_coord, traectory):
             R1 = distance([x2, y2, z2], lk_coord)
             R2 = distance([xn, yn, zn], lk_coord)
             R3 = distance([xn, yn, zn], [x2, y2, z2])
-            fi = int(math.degrees(math.acos((R1 ** 2 + R1 ** 2 - R3 ** 2) / (2 * R1 * R2)))) # угол между направлением на север и спутником
+            fi = float(math.degrees(math.acos((R1 ** 2 + R2 ** 2 - R3 ** 2) / (2 * R1 * R2)))) # угол между направлением на север и спутником
 
             # найдём из фи азимут
-            xp = float(-y0*z0 - y0*(x0 ** 2 + y0 ** 2)/z0) # координаты вектора (вектор р), перпендикулярного вектоу направления на север
+            xp = float(-y0*z0 - y0 * (x0 ** 2 + y0 ** 2) / z0) # координаты вектора (вектор р), перпендикулярного вектоу направления на север
             yp = float(x0*(x0 ** 2 + y0 ** 2)/z0 + x0*z0)
 
             R1 = distance([x0+xp, y0+yp, z0], lk_coord)
             R2 = distance([x2, y2, z2], lk_coord)
             R3 = distance([x0+xp, y0+yp, z0], [x2, y2, z2])
-            fi2 = math.degrees(math.acos((R1 ** 2 + R1 ** 2 - R3 ** 2) / (2 * R1 * R2))) # угол между направлением на спутник и вектором р
-            if fi2 > 90: # определяем, нужен ли пересчёт угла (fi от 0 до 180, азимут от 0 до 360)
-                fi = int(360 - fi)
+            fi2 = math.acos((R1 ** 2 + R2 ** 2 - R3 ** 2) / (2 * R1 * R2)) # угол между направлением на спутник и вектором р
+            if fi2 > math.radians(90): # определяем, нужен ли пересчёт угла (fi от 0 до 180, азимут от 0 до 360)
+                fi = 360 - fi
             answer[i] [0] = int(fi)
-        print(answer)
     save_file_as (answer, "answer") #файл с данными в фомате: азимут, угол наклона, час, минута, д, м, г
 
 try:
