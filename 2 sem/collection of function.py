@@ -10,23 +10,22 @@ from pyorbital.orbital import Orbital
 import numpy as np
 import pathlib
 
+#путь до папки, куда будут сохраняться файлы
 place = str('C:\\Users\\Admin\\Documents\\py\\sputnik')
 
-try:
-    shutil.rmtree(place)
-except OSError:
-    print ("Deletion of the directory %s failed" % place)
-else:
-    print ("Successfully deleted the directory %s" % place)
-
-try:
-    os.mkdir(place)
-except OSError:
-    print ("Creation of the directory %s failed" % place)
-else:
-    print ("Successfully created the directory %s" % place)
-
 def read_txt ():
+    try:
+        shutil.rmtree(place)
+    except OSError:
+        print ("Deletion of the directory %s failed" % place)
+    else:
+        print ("Successfully deleted the directory %s" % place)
+    try:
+        os.mkdir(place)
+    except OSError:
+        print ("Creation of the directory %s failed" % place)
+    else:
+        print ("Successfully created the directory %s" % place)
     try:
         os.mkdir(place)
     except OSError:
@@ -39,9 +38,6 @@ def read_txt ():
     open(place + '/' + name, 'wb').write(data.content)
     with open(place + '/' + name, 'r') as file:
         lines = file.readlines()
-    #words1 = lines[58].split()
-    #words2 = lines[59].split()
-    #return [words1[3], words2[2], words2[3], words2[4], words2[5], words2[6], words2[7]]
     return [lines[58], lines[59]] #вывод 2 строк нужного tle
 
 def CoordToDec(lon, lat, r):
@@ -56,14 +52,11 @@ def CoordToDec(lon, lat, r):
 # функция возвращает список географических координат (долгота, широта, высота над поверхностью) в виде двумерного массива
 # подразумевается, что наблюдение начинается в 00:00 дня track_day и длится dur минут,
 # точки рассчитываются раз в step минут
-
 # lon(-180, 180), lat(-90,90), r - над поверхностью!
 # чтобы получить чисто сферические координаты - r+6400 км
 
 def create_orbital_track_shapefile_for_day (track_day, step, dur, tle):
     # получаем TLE для NOAA-19
-    #tle_1 = '1 33591U 09005A   21067.53688389  .00000027  00000-0  40065-4 0  9999'
-    #tle_2 = '2 33591  99.1917  85.7021 0014730  58.0337 302.2263 14.12454575622414'
     tle_1 = str(tle[0])
     tle_2 = str(tle[1])
  
@@ -102,6 +95,14 @@ def create_orbital_track_shapefile_for_day (track_day, step, dur, tle):
 
     return coord # возвращает координаты и время в формате: x, y, z, час, минута, д, м, гггг (время местное = Московское)
 
-tle = read_txt()
-geo_coord = create_orbital_track_shapefile_for_day(date(2021,3,10), 1, 20, tle) 
-print (geo_coord)
+try:
+    tle = read_txt()
+    print("Введите дату начала наблюдения и продолжительность в фомате: дд мм гггг (время в часах)")
+    enter = str(input())
+    enter_list = enter.split()
+    length = int(enter_list[3]) * 60
+    geo_coord = create_orbital_track_shapefile_for_day(date(int(enter_list[2]),int(enter_list[1]),int(enter_list[0])), 1, length, tle)
+    name = "coord.txt"
+    np.savetxt(place + '/' + name, geo_coord, fmt = '%3.0d')
+except:
+    print("something don't work")
