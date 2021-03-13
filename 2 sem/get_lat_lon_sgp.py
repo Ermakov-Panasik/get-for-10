@@ -39,7 +39,7 @@ def create_orbital_track_shapefile_for_day (track_day, step, dur):
 
         coord[i] [0] = lon
         coord[i] [1] = lat
-        coord[i] [2] = alt #или alt + 6400
+        coord[i] [2] = alt + 6400
 
         i += 1
         minutes += step
