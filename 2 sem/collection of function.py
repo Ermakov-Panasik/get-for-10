@@ -11,7 +11,7 @@ import numpy as np
 import pathlib
 
 #путь до папки, куда будут сохраняться файлы
-place = str('C:\\Users\\Admin\\Documents\\py\\sputnik')
+place = str('C:\\Users\\hp\\Desktop\\sputnik') #'C:\\Users\\Admin\\Documents\\py\\sputnik'
 
 def read_txt ():
     try:
@@ -41,11 +41,11 @@ def read_txt ():
     return [lines[58], lines[59]] #вывод 2 строк нужного tle
 
 def CoordToDec(lon, lat, r):
-    lat = (90-lat)*math.pi/180
-    lon = lon*math.pi/180
-    x = r * math.sin(lat) * math.cos(lon)
+    lat = math.radians(lat)
+    lon = math.radians(lon)
+    x = r * math.cos(lat) * math.cos(lon)
     y = r * math.sin(lon) * math.cos(lat)
-    z = r * math.cos(lat)
+    z = r * math.sin(lat)
     return (x,y,z)
 
 
