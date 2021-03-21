@@ -8,10 +8,9 @@ import spacetrack.operators as op
 from spacetrack import SpaceTrackClient
 from pyorbital.orbital import Orbital
 import numpy as np
-import pathlib
 
 #путь до папки, куда будут сохраняться файлы
-place = str("C:\\Users\\hp\\Desktop\\sputnik")
+place = str('C:\\Users\\Admin\\Documents\\py\\sputnik')  #'C:\\Users\\hp\\Desktop\\sputnik'
 
 def read_txt ():
     try:
@@ -26,12 +25,6 @@ def read_txt ():
         print ("Creation of the directory %s failed" % place)
     else:
         print ("Successfully created the directory %s" % place)
-    try:
-        os.mkdir(place)
-    except OSError:
-        print ("Creation of the directory %s failed" % place)
-    else:
-        print ("Successfully created the directory %s " % place)
 
     name = ("TLE.txt")
     data = requests.get("http://celestrak.com/NORAD/elements/noaa.txt", allow_redirects=True)
@@ -40,7 +33,7 @@ def read_txt ():
         lines = file.readlines()
     return [lines[58], lines[59]] #возврат 2 строк нужного tle
 
-def CoordToDec(lon, lat, r): #перевод географических координат в декартовы
+def CoordToDec(lon, lat, r):
     lat = math.radians(lat)
     lon = math.radians(lon)
     x = r * math.cos(lat) * math.cos(lon)
@@ -48,7 +41,13 @@ def CoordToDec(lon, lat, r): #перевод географических коо
     z = r * math.sin(lat)
     return (x,y,z)
 
-def track_coord (track_day, step, dur, tle):
+# функция возвращает список географических координат (долгота, широта, высота над поверхностью) в виде двумерного массива
+# подразумевается, что наблюдение начинается в 00:00 дня track_day и длится dur минут,
+# точки рассчитываются раз в step минут
+# lon(-180, 180), lat(-90,90), r - над поверхностью!
+# чтобы получить чисто сферические координаты - r+6370 км
+
+def create_orbital_track_shapefile_for_day (track_day, step, dur, tle):
     # получаем TLE для NOAA-19
     tle_1 = str(tle[0])
     tle_2 = str(tle[1])
@@ -162,13 +161,12 @@ try:
     enter = str(input())
     enter_list = enter.split()
     length = int(enter_list[3]) * 60
-    geo_coord = track_coord(date(int(enter_list[2]),int(enter_list[1]),int(enter_list[0])), 1, length, tle)
+    geo_coord = create_orbital_track_shapefile_for_day(date(int(enter_list[2]),int(enter_list[1]),int(enter_list[0])), 1, length, tle)
     save_file_as (geo_coord, "coord")
     lon_lk = 37.51814961433411  #координаты взяты из https://www.mapsdirections.info/ru/GPS-координаты-Google-Картах.html
     lat_lk = 55.93018181969348
     H_lk = 0.198 + 6370
     lk_coord = CoordToDec(lon_lk, lat_lk, H_lk)
     find_angle (lk_coord, place + "\\coord.txt")
-
 except:
     print("something don't work")
