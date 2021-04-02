@@ -20,10 +20,8 @@ save_file = open(place + '\\' + "wav_read.txt", "a")
 fs, data = wav.read('C:\\Users\\Admin\\Documents\\py\\signal.wav')
 print(fs)
 print(len(data))
-if fs%2 > 0:
-    fs += 2
-# def save_file_as (data, name):
-#     np.savetxt(place + '\\' + name + ".txt", data, fmt = '%3.0d')
+def save_file_as (data, name):
+    np.savetxt(place + '\\' + name + ".txt", data, fmt = '%3.0d')
 
 # # визуализация сигнала и получение матрицы
 
@@ -140,16 +138,46 @@ data_am = hilbert(data) #раскрытие амплитудной модуля�
 # plt.title("Signal")
 # plt.show()
 
-max_value = max(data_am)
+save_file_as(data_am, "data_with_exception") # только для тестирования
+max_value = max(data_am) # избавление от выбросов
+exception = []
+for i in range(0, len(data_am), 1):
+    if (data_am[i] >= 0.9*max_value):
+        exception.append(i)
+if (len(exception) <= 0.00001*len(data_am)):
+    print("we have any exceptions")
+    for i in range(0, len(exception), 1):
+        data_am[exception[i]] = 0
+    max_value = max(data_am)
+    for i in range(0, len(exception), 1):
+        data_am[exception[i]] = max_value
+
+print(max_value)
+save_file_as(data_am, "data_without_exception") # только для тестирования
+
+def find_impulse(data, first_it):
+    # поиск синхроимпульса
+    # если синхроимпульс не найден, возвращаемый индекс должен быть > len(data_am)
+    return first_it + 51 # временная заглушка для тестирования
+
+new_data = np.zeros((len(data_am), 1))
+elem = int(0)
+it = find_impulse(data_am, 0)
+while it <= len(data_am) - int(fs*0.5):
+    for j in range(it, it + int(fs*0.5), 1):
+        new_data[elem] = data_am[j]
+        elem += 1
+    k = it + int(fs*0.5) - 50
+    it = find_impulse(data_am, k)
+
 w = int(0.5*fs) #длина одной линии = ширина кадра
 h = data_am.shape[0]//w #высота кадра
 image = Image.new('RGB', (w, h))
 
 px, py = 0, 0
-for p in range(data_am.shape[0]):
-    light = int(data_am[p]/max_value * 255)
+for p in range(new_data.shape[0]):
+    light = int(new_data[p]/max_value * 255)
     if light < 0: light = 0
-    if light > 255: light = 255
     image.putpixel((px, py), (light, light, light))
     px += 1
     if px >= w:
