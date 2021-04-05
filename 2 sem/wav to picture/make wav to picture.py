@@ -13,24 +13,11 @@ def hilbert(data):
     amplitude_envelope = np.abs(analytical_signal)
     return amplitude_envelope
 
-def find_impulse(data, first_it):
-    id = first_it
-    for i in range(first_it, len(data)-91, 1):
-        counter = 0
-        for j in range (0, 84, 14):
-            if abs(data[i+j] - 1800) > 1600 or abs(data[i+j+7]-data[i+j]) > 21500 or abs(data[i+j+7]-data[i+j]) < 3000: 
-                counter = counter+1
-        if counter <= 2:
-            id = i
-            break 
-    return id
-
-
-place = 'C:\\Users\\hp\\sputnik' #'C:\\Users\\hp\\sputnik''C:\\Users\\Admin\\Documents\\py\\wav'
+place = 'C:\\Users\\Admin\\Documents\\py\\wav' #'C:\\Users\\hp\\sputnik''C:\\Users\\Admin\\Documents\\py\\wav'
 
 save_file = open(place + '\\' + "wav_read.txt", "a")
 
-fs, data = wav.read('C:\\Users\\hp\\sputnik\\signal.wav')
+fs, data = wav.read('C:\\Users\\Admin\\Documents\\py\\signal.wav') # 'C:\\Users\\Admin\\Documents\\py\\signal.wav' 'C:\\Users\\hp\\sputnik\\signal.wav'
 print(fs)
 print(len(data))
 def save_file_as (data, name):
@@ -151,9 +138,10 @@ data_am = hilbert(data) #раскрытие амплитудной модуля�
 # plt.title("Signal")
 # plt.show()
 
+# избавление от выбросов
 save_file_as(data_am, "data_with_exception") # только для тестирования
-max_value = max(data_am) # избавление от выбросов
 exception = []
+max_value = max(data_am)
 for i in range(0, len(data_am), 1):
     if (data_am[i] >= 0.9*max_value):
         exception.append(i)
@@ -168,6 +156,20 @@ if (len(exception) <= 0.00001*len(data_am)):
 print(max_value)
 save_file_as(data_am, "data_without_exception") # только для тестирования
 
+# поиск синхроимпульса
+def find_impulse(data, first_it):
+    id = first_it
+    for i in range(first_it, len(data)-91, 1):
+        counter = 0
+        for j in range (0, 84, 14):
+            if data[i+j] > 0.3*max_value or abs(data[i+j+7]-data[i+j]) > max_value*0.7 or abs(data[i+j+7]-data[i+j]) < 0.3*max_value: 
+                counter = counter+1
+        if counter <= 2:
+            id = i
+            break 
+    return id
+
+# пересохранение правильного массива
 new_data = np.zeros((len(data_am), 1))
 elem = int(0)
 it = find_impulse(data_am, 0)
@@ -175,7 +177,7 @@ while it <= len(data_am) - int(fs*0.5):
     for j in range(it, it + int(fs*0.5), 1):
         new_data[elem] = data_am[j]
         elem += 1
-    k = it + int(fs*0.5) - 50
+    k = it + int(fs*0.5)
     it = find_impulse(data_am, k)
 
 save_file_as(new_data, "new_data")
